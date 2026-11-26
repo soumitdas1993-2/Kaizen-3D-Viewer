@@ -4,80 +4,92 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 
 class MainActivity : Activity() {
-    private lateinit var selectedFileText: TextView
+    private lateinit var webView: WebView
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
-    @Suppress("DEPRECATION")
+    @Suppress("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(32, 40, 32, 40)
-            setBackgroundColor(0xFF101820.toInt())
-        }
-        val title = TextView(this).apply {
-            text = "KAIZEN 3D VIEWER"
-            textSize = 26f
-            gravity = Gravity.CENTER
-            setTextColor(0xFFFFFFFF.toInt())
-        }
-        val subtitle = TextView(this).apply {
-            text = "Mobile engineering model viewer"
-            textSize = 15f
-            gravity = Gravity.CENTER
-            setTextColor(0xFFB8C7D1.toInt())
-            setPadding(0, 12, 0, 32)
-        }
-        val chooseButton = Button(this).apply {
-            text = "OPEN 3D FILE"
-            setOnClickListener {
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "*/*"
+
+        webView = WebView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = true
+            settings.allowContentAccess = true
+            settings.allowFileAccessFromFileURLs = true
+            settings.allowUniversalAccessFromFileURLs = true
+            settings.mediaPlaybackRequiresUserGesture = true
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean = request?.url?.scheme != "file"
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    callback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    filePathCallback?.onReceiveValue(null)
+                    filePathCallback = callback
+                    return try {
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "*/*"
+                        }
+                        startActivityForResult(intent, REQUEST_OPEN_FILE)
+                        true
+                    } catch (error: Exception) {
+                        filePathCallback?.onReceiveValue(null)
+                        filePathCallback = null
+                        false
+                    }
                 }
-                startActivityForResult(intent, REQUEST_OPEN_FILE)
             }
         }
-        selectedFileText = TextView(this).apply {
-            text = "No file selected"
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setTextColor(0xFFFFFFFF.toInt())
-            setPadding(0, 28, 0, 0)
-        }
-        val note = TextView(this).apply {
-            text = "STEP and IFC 3D rendering will be added in a later development phase."
-            textSize = 12f
-            gravity = Gravity.CENTER
-            setTextColor(0xFFFFCC80.toInt())
-            setPadding(0, 36, 0, 0)
-        }
-        root.addView(title, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        root.addView(subtitle, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        root.addView(chooseButton, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        root.addView(selectedFileText, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        root.addView(note, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        setContentView(root)
+
+        setContentView(webView)
+        webView.loadUrl("file:///android_asset/viewer/index.html")
     }
 
     @Deprecated("Deprecated by Android; retained for broad platform compatibility")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_OPEN_FILE && resultCode == RESULT_OK) {
-            val uri: Uri? = data?.data
-            if (uri != null) {
-                selectedFileText.text = "Selected file:\n" + (uri.lastPathSegment ?: uri.toString())
-                Toast.makeText(this, "File selected", Toast.LENGTH_SHORT).show()
+        if (requestCode == REQUEST_OPEN_FILE) {
+            val result = if (resultCode == RESULT_OK && data?.data != null) {
+                arrayOf(data.data!!)
+            } else {
+                null
             }
+            filePathCallback?.onReceiveValue(result)
+            filePathCallback = null
         }
+    }
+
+    override fun onBackPressed() {
+        if (::webView.isInitialized && webView.canGoBack()) webView.goBack()
+        else super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        if (::webView.isInitialized) {
+            webView.loadUrl("about:blank")
+            webView.destroy()
+        }
+        super.onDestroy()
     }
 
     companion object {
