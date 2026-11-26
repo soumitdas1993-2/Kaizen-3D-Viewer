@@ -1,24 +1,31 @@
 # Kaizen 3D Viewer
 
-Android starter project for a mobile engineering-model viewer.
+Android engineering-model viewer with an embedded Three.js viewport.
 
-## Current starter features
-- Native Android application shell
-- File picker to select a model/document from device storage
-- GitHub Actions workflow to build and upload a debug APK
+## Current viewer features
 
-## Important: model rendering is not implemented yet
-This starter currently selects a file; it does **not** parse or display STEP, IFC, or other 3D geometry.
-
-The next development phase is to integrate suitable geometry engines and a 3D rendering layer:
-- STEP: Open CASCADE Technology (OCCT), typically through native Android/NDK integration.
-- IFC: IfcOpenShell or web-ifc, subject to Android compatibility and packaging.
-- 3D display: an Android-compatible OpenGL ES or Vulkan renderer.
-
-The exact implementation should be chosen after confirming target file types, model sizes, and Android device requirements.
+- Android file picker using the system document picker
+- STEP / STP import through OpenCascade WebAssembly (OCCT)
+- IFC import through web-ifc WebAssembly
+- Interactive 3D orbit, zoom and pan controls
+- Fit-to-model, camera reset and wireframe toggle
+- Model processing runs locally on the device; selected model files are not uploaded
 
 ## Build
-The GitHub Actions workflow builds a debug APK on pushes to main and on manual runs.
-After a successful run, download the artifact named **kaizen-3d-viewer-debug-apk** from the workflow run's Artifacts section.
 
-Local build requirements: JDK 17, Android SDK platform 35, Gradle 8.9.
+The GitHub Actions workflow installs the JavaScript viewer dependencies, copies the WebAssembly runtimes into the Android assets, and builds a debug APK.
+
+After a successful workflow run, download the artifact named **kaizen-3d-viewer-debug-apk**.
+
+## Supported formats in this build
+
+- STEP: `.step`, `.stp`
+- IFC: `.ifc`
+
+IGES and BREP import engines are not yet connected to the viewer UI.
+
+## Notes and limitations
+
+This is the first geometry-rendering milestone. Large CAD/BIM files may exceed available Android memory or take a long time to tessellate. IFC models are streamed into Three.js meshes; this initial viewer does not yet include advanced BIM property panels, element selection, sectioning, measurement tools, saved camera views, or optimized fragment caching. Validate with representative project files before relying on it for production work.
+
+The app uses WebView with locally packaged JavaScript and WebAssembly assets. JDK 17, Android SDK platform 35, Node.js 20 and Gradle 8.9 are used by CI.
