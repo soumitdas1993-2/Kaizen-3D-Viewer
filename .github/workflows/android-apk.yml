@@ -12,6 +12,24 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: viewer/package.json
+
+      - name: Install viewer dependencies and build web viewer
+        working-directory: viewer
+        run: |
+          npm install
+          npm run build
+
+      - name: Copy viewer into Android assets
+        run: |
+          mkdir -p app/src/main/assets/viewer
+          cp -R viewer/dist/. app/src/main/assets/viewer/
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
