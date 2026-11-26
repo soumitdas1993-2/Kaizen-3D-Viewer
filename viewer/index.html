@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#101820" />
+  <title>Kaizen 3D Viewer</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">K</span><div><strong>KAIZEN</strong><small>3D VIEWER</small></div></div>
+    <button id="openFile" class="primary">Open model</button>
+    <input id="fileInput" type="file" accept=".step,.stp,.ifc,.iges,.igs,.brep" hidden />
+  </header>
+  <main>
+    <section class="viewport">
+      <div id="stage"></div>
+      <div id="welcome" class="welcome">
+        <div class="cube-icon">◇</div>
+        <h1>Engineering models, on the move.</h1>
+        <p>Open a STEP or IFC model to begin.</p>
+        <button id="welcomeOpen" class="primary">Choose a model</button>
+        <small>Files are processed locally on this device.</small>
+      </div>
+      <div id="busy" class="busy" hidden><div class="spinner"></div><span id="busyText">Preparing model…</span></div>
+      <div class="view-tools">
+        <button id="fitView" title="Fit model">Fit</button>
+        <button id="resetView" title="Reset camera">Reset</button>
+        <button id="wireframe" title="Toggle wireframe">Wire</button>
+      </div>
+      <div class="hint">One finger: orbit · Two fingers: zoom / pan</div>
+    </section>
+    <footer class="statusbar">
+      <span id="fileName">No model loaded</span>
+      <span id="modelInfo">STEP / IFC</span>
+    </footer>
+  </main>
+  <script src="./wasm/occt-import-js.js"></script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
