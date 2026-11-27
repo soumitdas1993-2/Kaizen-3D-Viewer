@@ -44,6 +44,87 @@ let currentModel = null;
 let wireframeOn = false;
 let occtPromise = null;
 let ifcApi = null;
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let selectedMesh = null;
+let selectedOriginalMaterial = null;
+let ifcProperties = new Map();
+
+const propertyPanel = document.getElementById("propertyPanel");
+const propertyTitle = document.getElementById("propertyTitle");
+const propertyId = document.getElementById("propertyId");
+const propertyRows = document.getElementById("propertyRows");
+
+function readableIfcValue(value, depth = 0) {
+  if (value === null || value === undefined) return "—";
+  if (depth > 2) return "[…]";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.slice(0, 12).map(item => readableIfcValue(item, depth + 1)).join(", ");
+  if (typeof value === "object") {
+    if (Object.prototype.hasOwnProperty.call(value, "value")) return readableIfcValue(value.value, depth + 1);
+    const entries = Object.entries(value).slice(0, 8);
+    return entries.map(([key, item]) => `${key}: ${readableIfcValue(item, depth + 1)}`).join("; ");
+  }
+  return String(value);
+}
+
+function showElementProperties(mesh) {
+  const expressID = mesh.userData.ifcExpressID;
+  const props = expressID !== undefined ? ifcProperties.get(expressID) : null;
+  propertyTitle.textContent = props?.Name || mesh.name || "Selected element";
+  propertyId.textContent = expressID !== undefined ? `IFC Express ID: ${expressID}` : "Geometry selection";
+  propertyRows.replaceChildren();
+
+  const entries = props ? Object.entries(props).filter(([key, value]) =>
+    key !== "expressID" && value !== null && value !== undefined && typeof value !== "function"
+  ).slice(0, 28) : [["Name", mesh.name || "Unnamed part"]];
+
+  for (const [key, value] of entries) {
+    const k = document.createElement("div");
+    k.className = "property-key";
+    k.textContent = key;
+    const v = document.createElement("div");
+    v.className = "property-value";
+    v.textContent = readableIfcValue(value);
+    propertyRows.append(k, v);
+  }
+  propertyPanel.hidden = false;
+}
+
+function clearSelection() {
+  if (selectedMesh && selectedOriginalMaterial) selectedMesh.material = selectedOriginalMaterial;
+  selectedMesh = null;
+  selectedOriginalMaterial = null;
+  propertyPanel.hidden = true;
+}
+
+function selectAtPointer(event) {
+  if (!currentModel) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObject(currentModel, true).filter(hit => hit.object.isMesh);
+  if (!hits.length) return;
+  const mesh = hits[0].object;
+  if (selectedMesh === mesh) return;
+  clearSelection();
+  selectedMesh = mesh;
+  selectedOriginalMaterial = mesh.material;
+  const highlight = Array.isArray(mesh.material)
+    ? mesh.material.map(material => material.clone())
+    : mesh.material.clone();
+  const materials = Array.isArray(highlight) ? highlight : [highlight];
+  materials.forEach(material => {
+    material.emissive = new THREE.Color(0x1a8f78);
+    material.emissiveIntensity = 0.8;
+  });
+  mesh.material = highlight;
+  showElementProperties(mesh);
+}
+
+renderer.domElement.addEventListener("click", selectAtPointer);
+document.getElementById("closeProperties").addEventListener("click", clearSelection);
 
 function resize() {
   const width = Math.max(stage.clientWidth, 1);
@@ -61,6 +142,8 @@ function setBusy(show, message = "Preparing model…") {
 }
 
 function clearModel() {
+  clearSelection();
+  ifcProperties.clear();
   if (currentModel) {
     scene.remove(currentModel);
     currentModel.traverse((obj) => {
@@ -202,6 +285,14 @@ async function loadIfc(file, bytes) {
   try {
     ifcApi.StreamAllMeshes(modelID, (flatMesh) => {
       const placed = flatMesh.geometries;
+      let elementProps = {};
+      try {
+        const line = ifcApi.GetLine(modelID, flatMesh.expressID);
+        if (line && typeof line === "object") elementProps = { ...line };
+      } catch (error) {
+        console.warn("Could not read IFC properties for element", flatMesh.expressID, error);
+      }
+      ifcProperties.set(flatMesh.expressID, elementProps);
       for (let i = 0; i < placed.size(); i++) {
         const placedGeometry = placed.get(i);
         const source = ifcApi.GetGeometry(modelID, placedGeometry.geometryExpressID);
@@ -223,7 +314,8 @@ async function loadIfc(file, bytes) {
         geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
         geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
         const mesh = new THREE.Mesh(geometry, makeIfcMaterial(placedGeometry.color));
-        mesh.name = `IFC element ${flatMesh.expressID}`;
+        mesh.name = elementProps.Name || elementProps.LongName || `IFC element ${flatMesh.expressID}`;
+        mesh.userData.ifcExpressID = flatMesh.expressID;
         mesh.matrix.fromArray(placedGeometry.flatTransformation);
         mesh.matrixAutoUpdate = false;
         group.add(mesh);
