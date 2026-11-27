@@ -71,7 +71,7 @@ function readableIfcValue(value, depth = 0) {
 function showElementProperties(mesh) {
   const expressID = mesh.userData.ifcExpressID;
   const props = expressID !== undefined ? ifcProperties.get(expressID) : null;
-  propertyTitle.textContent = props?.Name || mesh.name || "Selected element";
+  propertyTitle.textContent = props?.Name ? readableIfcValue(props.Name) : (mesh.name || "Selected element");
   propertyId.textContent = expressID !== undefined ? `IFC Express ID: ${expressID}` : "Geometry selection";
   propertyRows.replaceChildren();
 
@@ -314,7 +314,9 @@ async function loadIfc(file, bytes) {
         geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
         geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
         const mesh = new THREE.Mesh(geometry, makeIfcMaterial(placedGeometry.color));
-        mesh.name = elementProps.Name || elementProps.LongName || `IFC element ${flatMesh.expressID}`;
+        mesh.name = elementProps.Name
+          ? readableIfcValue(elementProps.Name)
+          : (elementProps.LongName ? readableIfcValue(elementProps.LongName) : `IFC element ${flatMesh.expressID}`);
         mesh.userData.ifcExpressID = flatMesh.expressID;
         mesh.matrix.fromArray(placedGeometry.flatTransformation);
         mesh.matrixAutoUpdate = false;
