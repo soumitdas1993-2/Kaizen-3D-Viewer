@@ -79,6 +79,14 @@ function showElementProperties(mesh) {
     key !== "expressID" && value !== null && value !== undefined && typeof value !== "function"
   ).slice(0, 28) : [["Name", mesh.name || "Unnamed part"]];
 
+  // Geometry-derived dimensions are useful for both IFC and STEP selections.
+  const worldBox = new THREE.Box3().setFromObject(mesh);
+  if (!worldBox.isEmpty()) {
+    const size = worldBox.getSize(new THREE.Vector3());
+    entries.unshift(["Bounding size (model units)", `${size.x.toFixed(2)} × ${size.y.toFixed(2)} × ${size.z.toFixed(2)}`]);
+  }
+  entries.unshift(["Format", expressID !== undefined ? "IFC" : "STEP / geometry"]);
+
   for (const [key, value] of entries) {
     const k = document.createElement("div");
     k.className = "property-key";

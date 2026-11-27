@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="brand-mark">K</span><div><strong>KAIZEN</strong><small>3D VIEWER</small></div></div>
+    <div class="brand"><img class="brand-logo" src="./kaizen-logo.svg" alt="Kaizen 3D Viewer logo" /><div><strong>KAIZEN</strong><small>3D MODEL INSPECTOR</small></div></div>
     <button id="openFile" class="primary">Open model</button>
     <input id="fileInput" type="file" accept=".step,.stp,.ifc,.iges,.igs,.brep" hidden />
   </header>
@@ -17,7 +17,7 @@
     <section class="viewport">
       <div id="stage"></div>
       <div id="welcome" class="welcome">
-        <div class="cube-icon">◇</div>
+        <img class="welcome-logo" src="./kaizen-logo.svg" alt="Kaizen logo" />
         <h1>Engineering models, on the move.</h1>
         <p>Open a STEP or IFC model to begin.</p>
         <button id="welcomeOpen" class="primary">Choose a model</button>
@@ -36,7 +36,7 @@
         <button id="resetView" title="Reset camera">Reset</button>
         <button id="wireframe" title="Toggle wireframe">Wire</button>
       </div>
-      <div class="hint">One finger: orbit · Two fingers: zoom / pan</div>
+      <div class="hint">Drag: orbit · Pinch: zoom · Two fingers: pan</div>
     </section>
     <footer class="statusbar">
       <span id="fileName">No model loaded</span>
