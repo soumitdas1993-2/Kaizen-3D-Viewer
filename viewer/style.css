@@ -1,3 +1,40 @@
 :root{color-scheme:dark;font-family:Inter,Roboto,"Segoe UI",sans-serif;background:#101820;color:#edf3f7}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820}.topbar{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#17232d;border-bottom:1px solid #2a3a46}.brand{display:flex;align-items:center;gap:10px}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#75c7b2;color:#10211f;font-weight:900;font-size:21px}.brand strong{display:block;letter-spacing:2px;font-size:14px}.brand small{display:block;color:#90a4b2;font-size:9px;letter-spacing:2.5px;margin-top:2px}.primary{border:0;border-radius:8px;background:#72c6b0;color:#10211f;font-weight:700;padding:11px 16px;font-size:13px}main{height:calc(100% - 64px);display:flex;flex-direction:column}.viewport{position:relative;flex:1;min-height:0;background:radial-gradient(ellipse at center,#1a2a36 0%,#101820 75%)}#stage{position:absolute;inset:0}#stage canvas{display:block;width:100%;height:100%;touch-action:none}.welcome[hidden]{display:none!important}.welcome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;pointer-events:none}.welcome>*{pointer-events:auto}.cube-icon{font-size:64px;color:#75c7b2;line-height:1}h1{font-size:22px;margin:18px 0 8px;max-width:320px}.welcome p{color:#a9bac5;font-size:14px;margin:0 0 20px}.welcome small{color:#718795;font-size:11px;margin-top:14px}.view-tools{position:absolute;top:14px;right:14px;display:flex;gap:7px}.view-tools button{background:#1b2a35dd;border:1px solid #40515d;color:#dce7ed;border-radius:7px;padding:8px 11px;font-size:12px}.hint{position:absolute;left:12px;bottom:12px;color:#8da0ad;background:#15232dcc;border:1px solid #30414d;border-radius:6px;padding:6px 9px;font-size:10px;pointer-events:none}.statusbar{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:#17232d;border-top:1px solid #2a3a46;color:#a9bac5;font-size:11px;gap:12px}.statusbar span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.statusbar span:last-child{flex-shrink:0;color:#75c7b2}.busy{position:absolute;inset:0;background:#101820d9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:5;color:#dce7ed;font-size:13px}.busy[hidden]{display:none}.spinner{width:34px;height:34px;border:3px solid #40515d;border-top-color:#75c7b2;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(min-width:700px){.topbar{padding:0 24px}.welcome h1{font-size:28px}}
 .property-panel{position:absolute;left:12px;right:12px;bottom:54px;max-height:38%;overflow:auto;background:#172630f2;border:1px solid #49606c;border-radius:11px;padding:12px;z-index:4;box-shadow:0 8px 28px #0008;backdrop-filter:blur(8px)}
 .property-panel[hidden]{display:none!important}.property-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid #344955;padding-bottom:9px;margin-bottom:8px}.property-heading strong{display:block;font-size:14px;color:#eaf3f6}.property-heading small{display:block;color:#8da5b1;font-size:10px;margin-top:4px}.property-heading button{border:0;background:#30434e;color:#eaf3f6;border-radius:7px;font-size:22px;line-height:26px;width:30px;height:30px}.property-rows{display:grid;grid-template-columns:minmax(95px, .8fr) minmax(0,1.5fr);gap:7px 12px;font-size:11px}.property-key{color:#82cdbb;overflow-wrap:anywhere}.property-value{color:#dce7ed;overflow-wrap:anywhere;white-space:pre-wrap}.hint{z-index:2}
+
+/* Responsive engineering workstation layout */
+.topbar{min-height:60px;height:auto;padding:9px 14px;gap:10px}
+.brand{min-width:0;gap:9px}.brand-logo{width:42px;height:42px;object-fit:contain;flex:0 0 auto}
+.brand strong{font-size:13px}.brand small{font-size:8px;letter-spacing:1.7px}
+.primary{white-space:nowrap;min-height:40px;padding:10px 14px}
+.view-tools{top:10px;right:10px;left:10px;justify-content:flex-end;flex-wrap:wrap;gap:6px;z-index:3}
+.view-tools button{min-height:36px;padding:8px 12px;touch-action:manipulation}
+.welcome-logo{width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 8px 24px #0006)}
+.welcome h1{font-size:clamp(19px,5vw,27px)}
+.property-panel{left:10px;right:10px;bottom:52px;max-height:min(48%,420px);padding:11px}
+.property-rows{grid-template-columns:minmax(82px,.8fr) minmax(0,1.6fr);gap:7px 10px;font-size:11px}
+.statusbar{min-height:34px;height:auto;padding:7px 10px}
+@media(max-width:420px){
+ .topbar{padding:7px 10px;min-height:56px}
+ .brand-logo{width:36px;height:36px}
+ .brand strong{font-size:12px;letter-spacing:1.5px}
+ .brand small{font-size:7px;letter-spacing:1.2px}
+ .primary{font-size:12px;padding:9px 11px}
+ .view-tools{top:8px;right:8px;left:8px;gap:5px}
+ .view-tools button{font-size:11px;padding:7px 10px;min-height:34px}
+ .hint{left:8px;bottom:8px;max-width:calc(100% - 16px);font-size:9px}
+ .property-panel{left:7px;right:7px;bottom:42px;max-height:52%;padding:9px}
+ .property-rows{grid-template-columns:minmax(72px,.75fr) minmax(0,1.5fr);font-size:10px;gap:6px 8px}
+ .welcome-logo{width:88px;height:88px}
+ .statusbar{font-size:10px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ .topbar{min-height:48px;padding:4px 10px}
+ .brand-logo{width:32px;height:32px}
+ .welcome-logo{width:64px;height:64px}
+ .welcome h1{margin:8px 0 5px;font-size:18px}
+ .welcome p{margin-bottom:9px}
+ .welcome small{margin-top:7px}
+ .property-panel{max-height:58%;bottom:40px}
+ .hint{bottom:6px}
+}
