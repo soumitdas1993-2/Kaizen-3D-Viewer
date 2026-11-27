@@ -24,6 +24,13 @@
         <small>Files are processed locally on this device.</small>
       </div>
       <div id="busy" class="busy" hidden><div class="spinner"></div><span id="busyText">Preparing model…</span></div>
+      <section id="propertyPanel" class="property-panel" hidden>
+        <div class="property-heading">
+          <div><strong id="propertyTitle">IFC element</strong><small id="propertyId"></small></div>
+          <button id="closeProperties" aria-label="Close properties">×</button>
+        </div>
+        <div id="propertyRows" class="property-rows"></div>
+      </section>
       <div class="view-tools">
         <button id="fitView" title="Fit model">Fit</button>
         <button id="resetView" title="Reset camera">Reset</button>
