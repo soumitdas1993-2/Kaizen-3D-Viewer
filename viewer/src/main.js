@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as WebIFC from "web-ifc";
+import * as WebIFC from "web-ifc/web-ifc-api.js";
 
 const stage = document.getElementById("stage");
 const fileInput = document.getElementById("fileInput");
@@ -179,13 +179,23 @@ function makeIfcMaterial(color) {
 async function loadIfc(file, bytes) {
   setBusy(true, "Initializing IFC engine…");
   if (!ifcApi) {
-    ifcApi = new WebIFC.IfcAPI();
+    const IfcAPI = WebIFC.IfcAPI;
+    if (typeof IfcAPI !== "function") {
+      throw new Error("The IFC engine API could not be loaded. The Web-IFC module entry point is incorrect.");
+    }
+    ifcApi = new IfcAPI();
     const wasmPath = new URL("./wasm/", window.location.href).href;
     ifcApi.SetWasmPath(wasmPath, true);
-    await ifcApi.Init();
+    await ifcApi.Init(undefined, true);
+    if (typeof ifcApi.OpenModel !== "function") {
+      throw new Error("The IFC engine initialized without its model-loading API.");
+    }
   }
   setBusy(true, "Parsing IFC model…");
   const modelID = ifcApi.OpenModel(new Uint8Array(bytes));
+  if (modelID === undefined || modelID < 0) {
+    throw new Error("Web-IFC could not parse this file. It may be damaged or use an unsupported IFC schema.");
+  }
   const group = new THREE.Group();
   let meshCount = 0;
   let geometryCount = 0;
