@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as WebIFC from "web-ifc/web-ifc-api.js";
+import * as WebIFC from "web-ifc";
 
 const stage = document.getElementById("stage");
 const fileInput = document.getElementById("fileInput");
