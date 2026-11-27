@@ -38,3 +38,6 @@
  .property-panel{max-height:58%;bottom:40px}
  .hint{bottom:6px}
 }
+
+/* Let the viewer consume the exact remaining device height after the header. */
+html,body{min-height:0}body{display:flex;flex-direction:column}.topbar{flex:0 0 auto}main{height:auto;flex:1;min-height:0}
